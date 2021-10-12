@@ -1,0 +1,53 @@
+---
+title: "R Notebook"
+author: "Ismail Sarigul"
+date: "2020-10-12"
+output: github_document
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+
+```{r}
+library(readxl)
+Df1dataset <- read_excel("Table1_The Role of Non-material Resources.XLSX")
+```
+
+
+Df2dataset <- Df1dataset[ ,c(1, 17)]
+Df2dataset %>% pivot_wider(names_from = sex, values_from = cranial_volume)
+
+
+
+```{r}
+
+ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume, color= resource_rating))+
+  geom_point()+
+  facet_wrap(~father_has_primary_education)
+
+```
+
+```{r}
+ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume)) + 
+  stat_summary(fun=mean, fun.min = min, fun.max = max, geom = "point")+
+  facet_wrap(~father_has_primary_education)
+```
+
