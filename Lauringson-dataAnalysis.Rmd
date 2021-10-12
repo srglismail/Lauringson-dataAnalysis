@@ -31,10 +31,22 @@ library(readxl)
 Df1dataset <- read_excel("Table1_The Role of Non-material Resources.XLSX")
 ```
 
+```{r}
+origdata <- read.csv("data_2021_eng.csv")
+names(origdata)
+```
+```{r}
+Df2dataset <- Df1dataset[ ,c(1)]
+Df2dataset <- rename(Df2dataset, SexFM = sex)
+```
 
-Df2dataset <- Df1dataset[ ,c(1, 17)]
+
+
 Df2dataset %>% pivot_wider(names_from = sex, values_from = cranial_volume)
 
+```{r}
+orig1data <- cbind(Df2dataset,origdata)
+```
 
 
 ```{r}
@@ -49,5 +61,107 @@ ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume, color= resource_ratin
 ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume)) + 
   stat_summary(fun=mean, fun.min = min, fun.max = max, geom = "point")+
   facet_wrap(~father_has_primary_education)
+```
+
+
+```{r}
+ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume, color= sex)) + 
+  stat_summary(fun=mean, fun.min = min, fun.max = max, geom = "point")+
+  facet_wrap(~number_of_siblings)
+```
+
+```{r}
+ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume), color=resource_rating) + 
+geom_point()+
+facet_wrap(~number_of_siblings)
+```
+
+```{r}
+ggplot (data = Df1dataset, aes(x = sex, y = cranial_volume, 
+                               color= birthweight))+
+  geom_point()+
+  facet_wrap(~father_has_primary_education)
+```
+
+```{r}
+ggplot(data = orig1data, aes(x = SexFM, y = height)) + 
+  stat_summary(fun=mean, fun.min = min, fun.max = max, geom = "point")
+```
+
+```{r}
+plot(orig1data$height)
+```
+
+```{r}
+p <- ggplot(orig1data, aes(x = dads_education , y = height))
+p <- p + geom_point() + geom_smooth(method = lm)
+p
+
+```
+
+```{r}
+orig1data %>% 
+  ggplot(aes(dads_education, cran_vol)) +
+  geom_point(shape = 1) + # Use hollow circles
+  geom_smooth(method = "lm") + # Add linear regression line 
+  geom_abline(slope = 1, intercept = 0, linetype = 2, colour = "red")
+```
+
+
+```{r}
+orig1data %>% drop_na(SexFM) %>% 
+  ggplot(aes(parents_together, cran_vol, color=SexFM)) +
+  geom_point(shape = 1) + # Use hollow circles
+  geom_smooth(method = "lm") # Add linear regression line
+```
+
+```{r}
+
+orig1data %>% drop_na(SexFM) %>% filter(smoking < 0.5) %>% 
+  ggplot(aes(mothers_weight, cran_vol, color=SexFM)) +
+  geom_point(shape = 1) + # Use hollow circles
+  geom_smooth(method = "lm")+ # Add linear regression line
+  facet_wrap(~Max_edu_3)
+  
+```
+
+```{r}
+ 
+ggplot(orig1data, aes(x=cran_vol, fill = SexFM)) + 
+  geom_density(alpha = 0.5)+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
+  theme_minimal_hgrid(12)
+
+orig1data %>% drop_na(age_yrs) %>%
+ggplot(aes(x=age_yrs, fill = SexFM)) +
+geom_density(alpha = 0.5)+
+scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
+theme_minimal_hgrid(12)
+```
+
+
+```{r}
+orig1data %>% drop_na(SexFM) %>% 
+ggplot(aes(x = cran_vol, y = mothers_height)) +
+  geom_point(aes(color = SexFM)) +
+  facet_wrap(~dad_smokes)+
+  geom_smooth(method = "lm")+
+  scale_color_viridis_d()
+```
+
+
+```{r}
+Df1dataset %>% drop_na(sex) %>% 
+ggplot( aes(x = sex, y = cranial_volume, color= birthweight))+
+  geom_point()+
+  facet_wrap(~father_has_primary_education)
+```
+
+```{r}
+Df1dataset %>% filter(Eur_per_family_member < 200) %>% 
+ggplot(aes(x = Eur_per_family_member , y = cranial_volume))+ geom_point() +
+  geom_jitter(width = 8)+
+  geom_smooth(method = lm)
+
 ```
 
