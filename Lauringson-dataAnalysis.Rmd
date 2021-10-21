@@ -33,8 +33,10 @@ Df1dataset <- read_excel("Table1_The Role of Non-material Resources.XLSX")
 
 ```{r}
 origdata <- read.csv("data_2021_eng.csv")
-names(origdata)
+
 ```
+
+
 ```{r}
 Df2dataset <- Df1dataset[ ,c(1)]
 Df2dataset <- rename(Df2dataset, SexFM = sex)
@@ -46,22 +48,136 @@ Df2dataset %>% pivot_wider(names_from = sex, values_from = cranial_volume)
 
 ```{r}
 orig1data <- cbind(Df2dataset,origdata)
+names(orig1data)
+```
+
+```{r}
+library(patchwork)
+library(cowplot)
+library(ggpmisc)
 ```
 
 
-```{r}
 
-ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume, color= resource_rating))+
+```{r}
+ggplot(data = orig1data, aes(x = cran_vol, y = BMI, color= SexFM)) +
+  geom_smooth(method = "lm")+
   geom_point()+
-  facet_wrap(~father_has_primary_education)
+  labs(title = "Body Mass Index - Cranial Volume Relation")+
+  theme_cowplot()
+```
+
+
+```{r}
+ggplot(data = orig1data, aes(x = N_sibs, y = height, color= SexFM)) +
+  geom_smooth(method = "lm")+
+  geom_point()+
+  #labs(title = "Weight - Cranial Volume Relation")+
+  theme_cowplot()
+```
+
+```{r}
+
+orig1data$N_sibs <- as.character(orig1data$N_sibs)
+
+orig1data %>% drop_na(N_sibs) %>% filter(N_sibs > 5 ) %>% 
+ggplot(aes(height, after_stat(count), color = N_sibs )) +
+  geom_density(alpha=0.4, size=2)+
+  theme_cowplot()
+```
+
+```{r}
+orig1data %>% drop_na(N_sibs) %>% filter(N_sibs > 5 ) %>% 
+ggplot(aes(height, N_sibs, color = N_sibs )) +
+  geom_boxplot()+
+  geom_point(size=3, alpha= 0.7)+coord_flip()+
+  theme_cowplot()
+```
+
+
+```{r}
+ggplot(orig1data, aes(height, N_sibs, color = SexFM )) +
+  geom_boxplot() +coord_flip()+
+  theme_cowplot()
+```
+
+
+```{r}
+# function for number of observations 
+give.n <- function(x){
+  return(c(y = median(x)*1.15, label = length(x))) 
+  # experiment with the multiplier to find the perfect position
+}
+
+# function for mean labels
+mean.n <- function(x){
+  return(c(y = median(x)*0.9, label = round(mean(x),3))) 
+  # experiment with the multiplier to find the perfect position
+}
+
+# plot
+ggplot(orig1data, aes(N_sibs, height, color= SexFM, label=rownames(height))) +
+  geom_boxplot(aes(fill = SexFM)) +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median) +
+  #stat_summary(fun.data = mean.n, geom = "text", fun.y = mean, colour = "red")
+  theme_cowplot()
+```
+
+
+
+
+```{r}
+ggsave2("Images/lastplot9.tiff", plot= last_plot(), width = 7, height = 5)
+```
+
+
+
+```{r}
+orig1data %>% 
+ggplot(aes(y =N_sibs ,x=school_ID, fill= school_ID)) + 
+  geom_bar(position="dodge", stat = "identity") #+
+  #scale_fill_viridis(discrete = TRUE, option="D", alpha=0.4)
+
+```
+
+
+```{r}
+Df1dataset$father_has_primary_education <- as.character(Df1dataset$father_has_primary_education)
+
+Df1dataset$meat_shortage <- as.character(Df1dataset$meat_shortage)
+
+Df1dataset %>% drop_na(meat_shortage) %>% 
+ggplot(aes(x =meat_shortage , y = cranial_volume, color=sex, shape=father_has_primary_education)) +
+   geom_point(position = "jitter", size=3)
+```
+
+
+```{r}
+Df1dataset %>% 
+ggplot(aes(x =meat_shortage , y = cranial_volume, fill=sex)) +
+  geom_violin(alpha= 0.7)+
+  facet_grid(~father_has_primary_education)+
+  theme_cowplot(font_size = 12)
 
 ```
 
 ```{r}
-ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume)) + 
-  stat_summary(fun=mean, fun.min = min, fun.max = max, geom = "point")+
-  facet_wrap(~father_has_primary_education)
+library(viridis)
+library(vioplot)
 ```
+
+
+```{r, fig.height=5}
+Df1dataset %>%  drop_na(father_has_primary_education, meat_shortage) %>% 
+ggplot(aes(x =meat_shortage , y = cranial_volume, fill=sex)) +
+    #geom_violin(width=1) +
+    geom_boxplot(width=0.3, color="black", alpha=1) +
+    #geom_jitter(aes(color=sex),width = 0.08, size=0.3, color="black")+
+    scale_fill_viridis(discrete = TRUE, option="D", alpha=0.4) +
+     #facet_wrap(~father_has_primary_education, nrow = 3)+
+    theme_cowplot() 
+```
+
 
 
 ```{r}
@@ -69,6 +185,22 @@ ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume, color= sex)) +
   stat_summary(fun=mean, fun.min = min, fun.max = max, geom = "point")+
   facet_wrap(~number_of_siblings)
 ```
+
+
+```{r}
+a <- orig1data %>%  
+ggplot(aes(x = height, fill = SexFM))+
+  geom_density(alpha = 0.5)+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
+  theme_cowplot()
+
+b <- orig1data %>%  
+ggplot(aes(x = height, fill = SexFM))+
+  geom_density(alpha = 0.5)+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
+  theme_cowplot()
+```
+
 
 ```{r}
 ggplot(data = Df1dataset, aes(x = sex, y = cranial_volume), color=resource_rating) + 
@@ -137,10 +269,18 @@ a <- ggplot(orig1data, aes(x=cran_vol, fill = SexFM)) +
 b <- orig1data %>% drop_na(age_yrs) %>%
 ggplot(aes(x=age_yrs, fill = SexFM)) +
 geom_density(alpha = 0.5)+
+  #facet_wrap(~school_ID)+
 scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
   theme_cowplot()
 
-a / b + plot_layout(heights = c(1, 1), ncol = 2, nrow = 1, widths = c(1,1))
+orig1data %>% drop_na(age_yrs) %>%
+ggplot(aes(x=cran_vol/age_yrs, fill = SexFM)) +
+geom_density(alpha = 0.5)+
+  facet_wrap(~SexFM)+
+scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
+  theme_cowplot()
+
+a / b  + plot_layout(ncol = 2, nrow = 1)
 
 ```
 
@@ -234,13 +374,16 @@ orig1data %>% drop_na(N_sibs) %>% filter(N_sibs != 5) %>%
 
 ## Modelling
 
+
 ```{r}
+
 library(broom)
-lm(data= orig1data, cran_vol ~ cohab_3  + school_ID) %>% tidy()
+
+lm(data= orig1data, cran_vol ~ N_sibs + birth_weight ) %>% tidy()
 ```
 
 ```{r}
-lm(data= orig1data, cran_vol ~ sex  + lacking_milk_meat) %>% tidy()
+lm(data= orig1data, cran_vol ~ weigth  +lacking_milk_meat) %>% tidy()
 ```
 
 
